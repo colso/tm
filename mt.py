@@ -132,7 +132,7 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
 		for item in item_list:
 			print("info {} {} {} {}".format(item['id'], item['status'], item['name'], item['hash_string']))
             #full_hash_magnet = "magnet:?xt=urn:btih:"+item['hash_string'].upper()
-			full_hash_magnet = Item['hash_string'].upper()
+			full_hash_magnet = item['hash_string'].upper()
 			title = item['name']
 			status = item['status']
 			delta_time = item['delta_time']
@@ -151,7 +151,8 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
 			else:
 				running_dic[full_hash_magnet]={'title':item['name'],'status':status}
 				continue;
-	except:
+	except Exception as e:
+		print(e)
 		return running_dic, completed_dic, max_cnt
 	#	time.sleep(10)
 
