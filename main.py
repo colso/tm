@@ -90,6 +90,30 @@ def get_request_candidate(db_conn):
         return candi_dic['HASH']
     return None
 
+def check_old_running_item(db_conn, timeout):
+    if not db_conn:
+        print("Please Check DB Connection")
+        return {}
+
+    runp = tdb.run_tbl()
+    runp.set_db_connection(db_conn)
+    r_ret, r_result_set = runp.torr_run_search_old(timeout)
+
+    if r_result_set:
+        old_list = []
+        for i in range(len(r_result_set)):
+            old_list.append(r_result_set[i]['HASH'])
+    else:
+        return None
+
+    if old_list:
+        for i in range(len(old_list)):
+            mt.remove_torrent_and_data_from_magnet(old_list[i])
+            runp.torr_run_delete(old_list[i])
+            move_to_complete_table(old_list[i], "Expire Running")
+
+    return None
+
 def main():
 	c_ini = config.TwalConfig('./config.ini', debug=False)
 	db_conn = tdb.connect_to_db(
@@ -103,22 +127,30 @@ def main():
 	else:
 		print("DB NOTTTTTTT connected")
 
-    # get magnet from CANDI_TBL
-	candi_magnet_one = get_request_candidate(db_conn)
-	print(candi_magnet_one)
-    # try add to transmission
-	r_dic = {}
-	c_dic = {}
-	running_cnt = 0
-	r_dic, c_dic, running_cnt = mt.proc_run(candi_magnet_one,
-		c_ini.TR.host,
-		c_ini.TR.t_id,
-		c_ini.TR.t_port,
-		c_ini.TR.t_pass)
-	for run_magnet in r_dic.keys():
-		move_to_run_table(db_conn, run_magnet, r_dic[run_magnet]['title'])
-	for com_magnet in c_dic.keys():
-		move_to_complete_table(db_conn, com_magnet, c_dic[com_magnet]['title'])
+	while True:
+		c_time = time.time()
+		if to_time + config.TIME.torrent_item_check_time < c_time:
+			# get magnet from CANDI_TBL
+			candi_magnet_one = get_request_candidate(db_conn)
+			print(candi_magnet_one)
+			# try add to transmission
+			r_dic = {}
+			c_dic = {}
+			running_cnt = 0
+			r_dic, c_dic, running_cnt = mt.proc_run(candi_magnet_one,c_ini.TR.host,
+				c_ini.TR.t_id,c_ini.TR.t_port,c_ini.TR.t_pass)
+			for run_magnet in r_dic.keys():
+				move_to_run_table(db_conn, run_magnet, r_dic[run_magnet]['title'])
+			for com_magnet in c_dic.keys():
+				move_to_complete_table(db_conn, com_magnet, c_dic[com_magnet]['title'])
+			check_old_running_item(db_conn, config.TIME.download_timeout)
+			if c_cnt < 3:
+				to_time = time.time() - config.TIME.torrent_item_check_time + 2
+			else:
+				to_time = time.time()
+		else:
+			print("Disk is ok. check next :: {}".format(c_time)))
+		time.sleep(2)
 
 
 if __name__ in ("__main__"):
