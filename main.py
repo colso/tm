@@ -127,9 +127,10 @@ def main():
 	else:
 		print("DB NOTTTTTTT connected")
 
+    to_time = time.time() - c_ini.TIME.torrent_item_check_time
 	while True:
 		c_time = time.time()
-		if to_time + config.TIME.torrent_item_check_time < c_time:
+		if to_time + c_ini.TIME.torrent_item_check_time < c_time:
 			# get magnet from CANDI_TBL
 			candi_magnet_one = get_request_candidate(db_conn)
 			print(candi_magnet_one)
@@ -143,13 +144,13 @@ def main():
 				move_to_run_table(db_conn, run_magnet, r_dic[run_magnet]['title'])
 			for com_magnet in c_dic.keys():
 				move_to_complete_table(db_conn, com_magnet, c_dic[com_magnet]['title'])
-			check_old_running_item(db_conn, config.TIME.download_timeout)
-			if c_cnt < 3:
-				to_time = time.time() - config.TIME.torrent_item_check_time + 2
+			check_old_running_item(db_conn, c_ini.TIME.download_timeout)
+			if running_cnt < 3:
+				to_time = time.time() - c_ini.TIME.torrent_item_check_time + 2
 			else:
 				to_time = time.time()
 		else:
-			print("Disk is ok. check next :: {}".format(c_time)))
+			print("Disk is ok. check next :: {}".format(c_time))
 		time.sleep(2)
 
 
