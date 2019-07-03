@@ -127,7 +127,7 @@ def main():
 	else:
 		print("DB NOTTTTTTT connected")
 
-    to_time = time.time() - c_ini.TIME.torrent_item_check_time
+	to_time = time.time() - c_ini.TIME.torrent_item_check_time
 	while True:
 		c_time = time.time()
 		if to_time + c_ini.TIME.torrent_item_check_time < c_time:
