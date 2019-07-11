@@ -138,8 +138,10 @@ def main():
 			r_dic = {}
 			c_dic = {}
 			running_cnt = 0
-			r_dic, c_dic, running_cnt = mt.proc_run(candi_magnet_one,c_ini.TR.host,
-				c_ini.TR.t_id,c_ini.TR.t_port,c_ini.TR.t_pass)
+			r_dic, c_dic, running_cnt = mt.proc_run(candi_magnet_one, c_ini.TR.host,
+				c_ini.TR.t_id,
+                c_ini.TR.t_port,
+                c_ini.TR.t_pass)
 			for run_magnet in r_dic.keys():
 				move_to_run_table(db_conn, run_magnet, r_dic[run_magnet]['title'])
 			for com_magnet in c_dic.keys():
