@@ -40,7 +40,7 @@ def get_torrent_info(tc):
         hash_s = item.hashString.upper()
         d_time = (datetime.now() - item.date_started).seconds
         ratio  = item.ratio
-    il.append({'id':id_num, 'status':status, 'name':name, 'hash_string':hash_s, 'delta_time':d_time, 'ratio':ratio})
+        il.append({'id':id_num, 'status':status, 'name':name, 'hash_string':hash_s, 'delta_time':d_time, 'ratio':ratio})
 
     return il
 
@@ -157,7 +157,7 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
 
     add_cnt = 0
 
-    if (delete_flag == 0) and magnet \
+    if (delete_flag == 0) and magnet and \
              ((len(item_list) - del_cnt) < max_cnt) and \
              (not magnet in running_dic):
         magnet = "magnet:?xt=urn:btih:"+magnet

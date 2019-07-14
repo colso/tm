@@ -127,6 +127,7 @@ def main():
 	else:
 		print("DB NOTTTTTTT connected")
 
+    db_conn.set_charset('utf8mb4')
 	to_time = time.time() - c_ini.TIME.torrent_item_check_time
 	while True:
 		c_time = time.time()
