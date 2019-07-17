@@ -130,7 +130,7 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
     try:
         for item in item_list:
             print("info {} {} {} {}".format(item['id'], item['status'], item['name'], item['hash_string']))
-#full_hash_magnet = "magnet:?xt=urn:btih:"+item['hash_string'].upper()
+            #full_hash_magnet = "magnet:?xt=urn:btih:"+item['hash_string'].upper()
             full_hash_magnet = item['hash_string'].upper()
             title = item['name']
             status = item['status']
