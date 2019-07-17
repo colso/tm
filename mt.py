@@ -4,6 +4,9 @@ import transmissionrpc
 from datetime import datetime
 import time
 import os
+import tmlogging as logger
+
+LOG = logger.get_logger(__name__)
 
 def connect_to_server(host, t_id, t_pass, t_port):
     try:
@@ -77,12 +80,12 @@ def remove_torrent_and_data_from_magnet(magnet):
     try:
         li = get_torrent_info(tc)
     except:
-        print("get_torrent_info exception in remove torrent")
-        print("Try to restart transmission service from remove torrent")
+        LOG.error("get_torrent_info exception in remove torrent")
+        LOG.error("Try to restart transmission service from remove torrent")
         return None
 
     if not li:
-        print("Remove torrent from magnet :: List is empty")
+        LOG.info("Remove torrent from magnet :: List is empty")
         if tc:
             release_for_connect(tc)
         return None
@@ -90,7 +93,7 @@ def remove_torrent_and_data_from_magnet(magnet):
     for item in li:
         full_hash_magnet = "magnet:?xt=urn:btih:"+item['hash_string'].upper()
         if magnet == full_hash_magnet:
-            print("Serach done by list {} : {}".format(magnet, item['name']))
+            LOG.info("Serach done by list {} : {}".format(magnet, item['name']))
             remove_torrent_at_server(tc, item['id'], remove_data=True)
 
     if tc:
@@ -113,23 +116,23 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
 
     conn = connect_to_server(host, u_id, u_pass, port)
     if not conn:
-        print("Do not connect Transmission Server")
+        LOG.warning("Do not connect Transmission Server")
         return ''
     else:
-        print("Connected Transmission server")
+        LOG.info("Connected Transmission server")
     try:
         item_list = get_torrent_info(conn)
     except:
-        print("get_torrent_info exception")
-        print("Try to stop transmission service")
+        LOG.error("get_torrent_info exception")
+        LOG.error("Try to stop transmission service")
         return {}, {}, max_cnt
 
-    print(datetime.today())
-    print(item_list)
+    LOG.info(datetime.today())
+    LOG.info(item_list)
     del_cnt = 0
     try:
         for item in item_list:
-            print("info {} {} {} {}".format(item['id'], item['status'], item['name'], item['hash_string']))
+            LOG.info("info {} {} {} {}".format(item['id'], item['status'], item['name'], item['hash_string']))
             #full_hash_magnet = "magnet:?xt=urn:btih:"+item['hash_string'].upper()
             full_hash_magnet = item['hash_string'].upper()
             title = item['name']
@@ -138,12 +141,12 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
             ratio = item['ratio']
 
             if status == 'seeding' or title.find('360p') >= 0:
-                print("Download Done {} Remove item {}".format(item['name'], datetime.today()))
+                LOG.info("Download Done {} Remove item {}".format(item['name'], datetime.today()))
                 completed_dic[full_hash_magnet]={'title':item['name'],'status':status}
                 remove_torrent_at_server(conn, item['id'])
                 del_cnt += 1
             elif ratio == -1.0 and delta_time > stall_time:
-                print("Stall item in list. Remove item({}) ".format(full_hash_magnet))
+                LOG.info("Stall item in list. Remove item({}) ".format(full_hash_magnet))
                 completed_dic[full_hash_magnet]={'title':item['name'],'status':"stall"}
                 remove_torrent_at_server(conn, item['id'])
                 delete_flag = 1
@@ -151,7 +154,7 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
                 running_dic[full_hash_magnet]={'title':item['name'],'status':status}
                 continue;
     except Exception as e:
-        print(e)
+        LOG.error(e)
         return running_dic, completed_dic, max_cnt
 #	time.sleep(10)
 
@@ -161,11 +164,11 @@ def proc_run(magnet, host=None, t_id=None, t_port=None, t_pass=None):
              ((len(item_list) - del_cnt) < max_cnt) and \
              (not magnet in running_dic):
         magnet = "magnet:?xt=urn:btih:"+magnet
-        print("[ {} ] Add magnet to server ({})".format(datetime.today(), magnet))
+        LOG.info("[ {} ] Add magnet to server ({})".format(datetime.today(), magnet))
         add_magnet_to_server(conn, magnet)
         add_cnt += 1
     else:
-        print("running magent : {}".format(magnet))
+        LOG.info("running magent : {}".format(magnet))
 
     release_for_connect(conn)
     return running_dic, completed_dic, (len(item_list) - del_cnt + add_cnt)

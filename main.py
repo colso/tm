@@ -7,10 +7,13 @@ import tdb
 import config
 import time
 import mt
+import tmlogging as logger
+
+LOG = logger.get_logger(__name__)
 
 def move_to_run_table(db_conn, hash_key, title):
     if not db_conn:
-        print("Please Check DB Connection")
+        LOG.warning("Please Check DB Connection")
         return ''
 
     runp = tdb.run_tbl()
@@ -38,7 +41,7 @@ def move_to_run_table(db_conn, hash_key, title):
 
 def move_to_complete_table(db_conn, hash_key, title):
     if not db_conn:
-        print("Please Check DB Connection")
+        LOG.warning("Please Check DB Connection")
         return ''
 
     comp = tdb.ret_tbl()
@@ -72,7 +75,7 @@ def move_to_complete_table(db_conn, hash_key, title):
 
 def get_old_item_from_candi_tbl(db_conn):
     if not db_conn:
-        print("Please Check DB Connection")
+        LOG.warning("Please Check DB Connection")
         return {}
 
     ctp = tdb.candi_tbl()
@@ -80,7 +83,7 @@ def get_old_item_from_candi_tbl(db_conn):
     ret, result_set = ctp.torr_candi_search_old_item()
     if result_set:
         #print("GET OLD ONE FROM CANDI ({})".format(ctp.torr_candi_fill_result(result_set[0])))
-        print("GET OLD ONE FROM CANDI ")
+        LOG.debug("GET OLD ONE FROM CANDI ")
         return result_set[0]
     return {}
 
@@ -92,7 +95,7 @@ def get_request_candidate(db_conn):
 
 def check_old_running_item(db_conn, timeout):
     if not db_conn:
-        print("Please Check DB Connection")
+        LOG.warning("Please Check DB Connection")
         return {}
 
     runp = tdb.run_tbl()
@@ -122,10 +125,11 @@ def main():
 			c_ini.DB.db_user_id,
 			c_ini.DB.db_user_pass,
 			c_ini.DB.db_name)
+    logger.setup(LOG, c_ini.LOG.logpath)
 	if db_conn:
-		print("DB connected")
+		LOG.debug("DB connected")
 	else:
-		print("DB NOTTTTTTT connected")
+        LOG.error("DB NOTTTTTTT connected")
 
     db_conn.set_charset('utf8mb4')
 	to_time = time.time() - c_ini.TIME.torrent_item_check_time
@@ -134,7 +138,7 @@ def main():
 		if to_time + c_ini.TIME.torrent_item_check_time < c_time:
 			# get magnet from CANDI_TBL
 			candi_magnet_one = get_request_candidate(db_conn)
-			print(candi_magnet_one)
+			LOG.debug(candi_magnet_one)
 			# try add to transmission
 			r_dic = {}
 			c_dic = {}
@@ -153,7 +157,7 @@ def main():
 			else:
 				to_time = time.time()
 		else:
-			print("Disk is ok. check next :: {}".format(c_time))
+			LOG.debug("Disk is ok. check next :: {}".format(c_time))
 		time.sleep(2)
 
 

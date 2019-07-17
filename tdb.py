@@ -4,6 +4,9 @@
 import pymysql
 import sys
 import time
+import tmlogging as logger
+
+LOG = logger.get_logger(__name__)
 
 def connect_to_db(host, port, user, passwd, db):
 	conn = None
@@ -11,7 +14,7 @@ def connect_to_db(host, port, user, passwd, db):
 		conn = pymysql.connect(host=host, port=port, user=user, 
 				passwd=passwd, db=db, autocommit=True, charset='utf8')
 	except:
-		print("Occur Exception from DB connect. "+
+		LOG.error("Occur Exception from DB connect. "+
 				"Please check connect infomation.({} {} {} {} {})".format(
 					host, port, user, passwd, db))
 	return conn
@@ -104,7 +107,7 @@ class torr_common_tbl:
 						host=host, port=port, user=user, passwd=passwd, 
 						db=db, autocommit=True, charset='utf8')
 		except:
-			print("Occur Exception from DB connect.Please check connect infomation.({} {} {} {} {})".format(
+			LOG.error("Occur Exception from DB connect.Please check connect infomation.({} {} {} {} {})".format(
 						host, port, user, passwd, db))
 
 	def __init__(self, host=None, port=None, user=None, passwd=None, db=None):
@@ -130,7 +133,7 @@ class torr_common_tbl:
 		try:
 			cursor, ret_num = self._common(sql)
 		except:
-			print("key error : {}".format(sql))
+			LOG.error("key error : {}".format(sql))
 			return -1
 
 		self.conn.commit()
