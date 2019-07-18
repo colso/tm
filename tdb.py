@@ -107,7 +107,7 @@ class torr_common_tbl:
 						host=host, port=port, user=user, passwd=passwd, 
 						db=db, autocommit=True, charset='utf8')
 		except:
-			LOG.error("Occur Exception from DB connect.Please check connect infomation.({} {} {} {} {})".format(
+			LOG.execption("Occur Exception from DB connect.Please check connect infomation.({} {} {} {} {})".format(
 						host, port, user, passwd, db))
 
 	def __init__(self, host=None, port=None, user=None, passwd=None, db=None):

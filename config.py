@@ -4,63 +4,63 @@ import os
 import configparser
 
 class Empty:
-	pass
+    pass
 
 def getValue(value):
-	try:
-		if value[0] == '/':
-			evalValue = value
-		else:
-			evalValue = eval(value)
-		if type(evalValue) in [int, float, list, tuple, dict, str]:
-			return evalValue
-	except NameError:
-		pass
-	return value
+    try:
+        if value[0] == '/':
+            evalValue = value
+        else:
+            evalValue = eval(value)
+        if type(evalValue) in [int, float, list, tuple, dict, str]:
+            return evalValue
+    except NameError:
+        pass
+    return value
 
 class TwalConfig:
-	def __init__(self, configFilename, debug = False):
-		self.debug = debug
-		self.filename = os.path.join(os.path.split(__file__)[0], configFilename)
-		self.config = configparser.ConfigParser()
-		self.config.optionxform = lambda option: option
-		self.config.read(self.filename)
-		print("Load Config : %s" % self.filename)
+    def __init__(self, configFilename, debug = False):
+        self.debug = debug
+        self.filename = os.path.join(os.path.split(__file__)[0], configFilename)
+        self.config = configparser.ConfigParser()
+        self.config.optionxform = lambda option: option
+        self.config.read(self.filename)
+        print("Load Config : %s" % self.filename)
 
-		for section in self.config.sections():
-			if self.debug is True:
-				print("[%s]" % section)
-			if not hasattr(self, section):
-				setattr(self, section, Empty())
+        for section in self.config.sections():
+            if self.debug is True:
+                print("[%s]" % section)
+            if not hasattr(self, section):
+                setattr(self, section, Empty())
 
-			current_section = getattr(self, section)
-			for option in self.config[section]:
-				value = self.config.get(section, option)
-				if self.debug is True:
-					print("%s = %s" % (option, value))
-				setattr(current_section, option, getValue(value))
-				#setattr(current_section, option, value)
+            current_section = getattr(self, section)
+            for option in self.config[section]:
+                value = self.config.get(section, option)
+                if self.debug is True:
+                    print("%s = %s" % (option, value))
+                setattr(current_section, option, getValue(value))
+                #setattr(current_section, option, value)
 
-	def getValue(self, section, option):
-		return getValue(self.config[section][option])
+    def getValue(self, section, option):
+        return getValue(self.config[section][option])
 
-	def setValue(self, section, option, value):
-		if not self.config.has_section(section):
-			self.config.add_section(section)
-		self.config[section][option] = str(value)
+    def setValue(self, section, option, value):
+        if not self.config.has_section(section):
+            self.config.add_section(section)
+        self.config[section][option] = str(value)
 
-		if not hasattr(self, section):
-			setattr(self, section, Empty())
-		current_section = getattr(self, section)
-		setattr(current_section, option, value)
+        if not hasattr(self, section):
+            setattr(self, section, Empty())
+        current_section = getattr(self, section)
+        setattr(current_section, option, value)
 
-	def save(self):
-		with open(self.filename, 'w') as configfile:
-			self.config.write(configfile)
-			print("Saverd Config : " + self.filename)
+    def save(self):
+        with open(self.filename, 'w') as configfile:
+            self.config.write(configfile)
+            print("Saverd Config : " + self.filename)
 
-	def getFilename(self):
-		return self.filename
+    def getFilename(self):
+        return self.filename
 
 #------------------------------------------------------------------------------
 
